@@ -32,4 +32,9 @@ class Game {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$GameToJson(this);
+
+  @override
+  String toString() {
+    return 'Game{name: $name, state: $state, board: $board, player_token: $player_token, player_role: $player_role, next_move_token: $next_move_token, created_at: $created_at, updated_at: $updated_at}';
+  }
 }
