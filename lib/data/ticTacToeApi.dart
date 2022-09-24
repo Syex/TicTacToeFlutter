@@ -6,7 +6,7 @@ import 'package:tic_tac_toe/data/dto/game.dart';
 import 'package:tic_tac_toe/data/dto/join_game_request.dart';
 
 class TicTacToeApi {
-  final String _baseUrl = "https://tik-tak-tioki.fly.dev/api/";
+  final String _baseUrl = "https://tik-tak-tioki.fly.dev/api";
 
   const TicTacToeApi();
 
@@ -29,6 +29,19 @@ class TicTacToeApi {
       return Game.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to create a new game: ${response.body}');
+    }
+  }
+
+  Future<Game> loadGame(String playerToken) async {
+    final response =
+        await http.get(Uri.parse("$_baseUrl/game").replace(queryParameters: {
+      "player_token": playerToken,
+    }));
+
+    if (response.statusCode == 200) {
+      return Game.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to refresh the game: ${response.body}');
     }
   }
 

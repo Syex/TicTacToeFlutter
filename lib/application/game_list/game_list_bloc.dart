@@ -32,8 +32,14 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      final newGame = await ticTacToeApi.createNewGame();
+      var game = await ticTacToeApi.createNewGame();
       emit(state.copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
+
+      while (game.state == "awaiting_join") {
+        await Future.delayed(const Duration(seconds: 2));
+        game = await ticTacToeApi.loadGame(game.player_token!);
+        print(game.state);
+      }
     } catch (error) {
       // todo show error
       print(error);
