@@ -13,8 +13,8 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
 
   void _mapGetOpenGamesEventToState(
       GetOpenGames event, Emitter<GameListState> emit) async {
+    emit(state.copyWith(isLoading: true));
     try {
-      emit(state.copyWith(isLoading: true));
       final openGames = await ticTacToeApi.fetchOpenGames();
       emit(GameListState(
         openGames: openGames,
@@ -28,6 +28,13 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
 
   void _createNewGame(CreateNewGame event, Emitter<GameListState> emit) async {
     emit(state.copyWith(isLoading: true));
+
+    try {
+      final newGame = ticTacToeApi.createNewGame();
+      emit(state.copyWith(isLoading: false));
+    } catch (error) {
+      // todo show error
+    }
   }
 }
 

@@ -17,7 +17,17 @@ class TicTacToeApi {
           .map((gameJson) => Game.fromJson(gameJson))
           .toImmutableList();
     } else {
-      throw Exception('Failed to load open games');
+      throw Exception('Failed to load open games: ${response.body}');
+    }
+  }
+
+  Future<Game> createNewGame() async {
+    final response = await http.post(Uri.parse("$_baseUrl/game"));
+
+    if (response.statusCode == 201) {
+      return Game.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create a new game: ${response.body}');
     }
   }
 }
