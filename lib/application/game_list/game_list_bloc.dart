@@ -1,12 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:tic_tac_toe/data/dto/game.dart';
+import 'package:tic_tac_toe/data/dto/join_game_request.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 class GameListBloc extends Bloc<GameListEvent, GameListState> {
   GameListBloc({required this.ticTacToeApi}) : super(GameListState()) {
     on<GetOpenGames>(_mapGetOpenGamesEventToState);
     on<CreateNewGame>(_createNewGame);
+    on<JoinGame>(_joinGame);
   }
 
   final TicTacToeApi ticTacToeApi;
@@ -22,7 +24,7 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
       ));
     } catch (error) {
       // todo show error
-      // emit(state.copyWith(status: AllGamesStatus.error));
+      print(error);
     }
   }
 
@@ -30,10 +32,24 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      final newGame = ticTacToeApi.createNewGame();
+      final newGame = await ticTacToeApi.createNewGame();
       emit(state.copyWith(isLoading: false));
     } catch (error) {
       // todo show error
+      print(error);
+    }
+  }
+
+  void _joinGame(JoinGame event, Emitter<GameListState> emit) async {
+    emit(state.copyWith(isLoading: true));
+
+    try {
+      final newGame = await ticTacToeApi.joinGame(JoinGameRequest(event.name));
+      print(newGame);
+      emit(state.copyWith(isLoading: false));
+    } catch (error) {
+      // todo show error
+      print(error);
     }
   }
 }
@@ -43,6 +59,12 @@ class GameListEvent {}
 class GetOpenGames extends GameListEvent {}
 
 class CreateNewGame extends GameListEvent {}
+
+class JoinGame extends GameListEvent {
+  final String name;
+
+  JoinGame(this.name);
+}
 
 class GameListState {
   final KtList<Game> openGames;

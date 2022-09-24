@@ -25,8 +25,7 @@ Game _$GameFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$GameToJson(Game instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$GameToJson(Game instance) => <String, dynamic>{
       'name': instance.name,
       'state': instance.state,
       'board': instance.board,

@@ -42,9 +42,13 @@ class GameListWidget extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         itemCount: openGames.size,
                         itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            height: 80,
-                            child: Center(child: Text(openGames[index].name)),
+                          final game = openGames[index];
+                          return InkWell(
+                            onTap: () => bloc.add(JoinGame(game.name)),
+                            child: Container(
+                              height: 80,
+                              child: Center(child: Text(game.name)),
+                            ),
                           );
                         },
                         separatorBuilder: (BuildContext context, int index) =>
