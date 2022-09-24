@@ -42,6 +42,7 @@ dependencies:
   kt_dart: ^0.10.0
 
   flutter_bloc: ^8.0.0
+  loader_overlay: ^2.0.10
 
 dev_dependencies:
   flutter_test:

@@ -6,6 +6,7 @@ import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 class GameListBloc extends Bloc<GameListEvent, GameListState> {
   GameListBloc({required this.ticTacToeApi}) : super(GameListState()) {
     on<GetOpenGames>(_mapGetOpenGamesEventToState);
+    on<CreateNewGame>(_createNewGame);
   }
 
   final TicTacToeApi ticTacToeApi;
@@ -23,6 +24,10 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
       // todo show error
       // emit(state.copyWith(status: AllGamesStatus.error));
     }
+  }
+
+  void _createNewGame(CreateNewGame event, Emitter<GameListState> emit) async {
+    emit(state.copyWith(isLoading: true));
   }
 }
 
