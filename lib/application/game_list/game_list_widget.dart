@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:tic_tac_toe/application/game_list/game_list_bloc.dart';
@@ -24,11 +25,9 @@ class GameListWidget extends StatelessWidget {
               GameListBloc(ticTacToeApi: ticTacToeApi)..add(GetOpenGames()),
           child: BlocBuilder<GameListBloc, GameListState>(
             builder: (context, state) {
-              if (state.isLoading) {
-                context.loaderOverlay.show();
-              } else {
-                context.loaderOverlay.hide();
-              }
+              evaluateIfLoading(state, context);
+
+              evaluateIfWaitingForAnotherPlayer(state, context);
 
               final bloc = BlocProvider.of<GameListBloc>(context);
               final openGames = state.openGames;
@@ -67,5 +66,32 @@ class GameListWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void evaluateIfWaitingForAnotherPlayer(
+      GameListState state, BuildContext context) {
+    if (state.isWaitingForAnotherPlayer) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                  title: const Text("Waiting for another player..."),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const <Widget>[CircularProgressIndicator()],
+                  ));
+            });
+      });
+    }
+  }
+
+  void evaluateIfLoading(GameListState state, BuildContext context) {
+    if (state.isLoading) {
+      context.loaderOverlay.show();
+    } else {
+      context.loaderOverlay.hide();
+    }
   }
 }

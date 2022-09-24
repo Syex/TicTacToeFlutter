@@ -33,7 +33,7 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
 
     try {
       final newGame = await ticTacToeApi.createNewGame();
-      emit(state.copyWith(isLoading: false));
+      emit(state.copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
     } catch (error) {
       // todo show error
       print(error);
@@ -45,7 +45,6 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
 
     try {
       final newGame = await ticTacToeApi.joinGame(JoinGameRequest(event.name));
-      print(newGame);
       emit(state.copyWith(isLoading: false));
     } catch (error) {
       // todo show error
@@ -69,16 +68,22 @@ class JoinGame extends GameListEvent {
 class GameListState {
   final KtList<Game> openGames;
   final bool isLoading;
+  final bool isWaitingForAnotherPlayer;
 
-  GameListState({this.openGames = const KtList.empty(), this.isLoading = true});
+  GameListState(
+      {this.openGames = const KtList.empty(),
+      this.isLoading = true,
+      this.isWaitingForAnotherPlayer = false});
 
   GameListState copyWith({
     KtList<Game>? openGames,
     bool? isLoading,
+    bool? isWaitingForAnotherPlayer,
   }) {
     return GameListState(
-      openGames: openGames ?? this.openGames,
-      isLoading: isLoading ?? this.isLoading,
-    );
+        openGames: openGames ?? this.openGames,
+        isLoading: isLoading ?? this.isLoading,
+        isWaitingForAnotherPlayer:
+            isWaitingForAnotherPlayer ?? this.isWaitingForAnotherPlayer);
   }
 }
