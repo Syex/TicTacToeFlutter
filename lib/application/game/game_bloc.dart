@@ -4,7 +4,7 @@ import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
   GameBloc({required this.ticTacToeApi, required this.game})
-      : super(GameState(game: game)) {
+      : super(Initial()) {
     on<LoadGame>(_loadGame);
   }
 
@@ -14,7 +14,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   void _loadGame(LoadGame event, Emitter<GameState> emit) async {
     try {
       game = await ticTacToeApi.loadGame(game.player_token!);
-      emit(GameState(
+      emit(ActiveGame(
         game: game,
       ));
     } catch (error) {
@@ -32,15 +32,35 @@ class GameEvent {}
 //
 class LoadGame extends GameEvent {}
 
-class GameState {
+class GameState {}
+
+class Initial extends GameState {}
+
+class ActiveGame extends GameState {
   final Game game;
 
-  GameState({required this.game});
+  ActiveGame({required this.game});
 
-  GameState copyWith({
+  bool isMyTurn() {
+    return game.state == "your_turn";
+  }
+
+  bool didIWin() {
+    return game.state == "you_won";
+  }
+
+  bool didTheyWin() {
+    return game.state == "they_won";
+  }
+
+  bool isDraw() {
+    return game.state == "draw";
+  }
+
+  ActiveGame copyWith({
     Game? game,
   }) {
-    return GameState(
+    return ActiveGame(
       game: game ?? this.game,
     );
   }
