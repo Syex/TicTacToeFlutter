@@ -6,19 +6,18 @@ import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 class GameListBloc extends Bloc<GameListEvent, GameListState> {
   GameListBloc({required this.ticTacToeApi}) : super(GameListState()) {
-    on<GetOpenGames>(_mapGetOpenGamesEventToState);
+    on<GetOpenGames>(_getOpenGames);
     on<CreateNewGame>(_createNewGame);
     on<JoinGame>(_joinGame);
   }
 
   final TicTacToeApi ticTacToeApi;
 
-  void _mapGetOpenGamesEventToState(
-      GetOpenGames event, Emitter<GameListState> emit) async {
-    emit(state.copyWith(isLoading: true));
+  void _getOpenGames(GetOpenGames event, Emitter<GameListState> emit) async {
+    emit(DisplayGames(isLoading: true));
     try {
       final openGames = await ticTacToeApi.fetchOpenGames();
-      emit(GameListState(
+      emit(DisplayGames(
         openGames: openGames,
         isLoading: false,
       ));
@@ -29,17 +28,19 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
   }
 
   void _createNewGame(CreateNewGame event, Emitter<GameListState> emit) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.asDisplayGames().copyWith(isLoading: true));
 
     try {
       var game = await ticTacToeApi.createNewGame();
-      emit(state.copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
+      emit(state
+          .asDisplayGames()
+          .copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
 
       while (game.state == "awaiting_join") {
         await Future.delayed(const Duration(seconds: 2));
         game = await ticTacToeApi.loadGame(game.player_token!);
-        print(game.state);
       }
+      emit(NavigateToActiveGame(game));
     } catch (error) {
       // todo show error
       print(error);
@@ -47,11 +48,11 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
   }
 
   void _joinGame(JoinGame event, Emitter<GameListState> emit) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.asDisplayGames().copyWith(isLoading: true));
 
     try {
       final newGame = await ticTacToeApi.joinGame(JoinGameRequest(event.name));
-      emit(state.copyWith(isLoading: false));
+      emit(NavigateToActiveGame(newGame));
     } catch (error) {
       // todo show error
       print(error);
@@ -72,24 +73,36 @@ class JoinGame extends GameListEvent {
 }
 
 class GameListState {
+  DisplayGames asDisplayGames() {
+    return this as DisplayGames;
+  }
+}
+
+class DisplayGames extends GameListState {
   final KtList<Game> openGames;
   final bool isLoading;
   final bool isWaitingForAnotherPlayer;
 
-  GameListState(
+  DisplayGames(
       {this.openGames = const KtList.empty(),
       this.isLoading = true,
       this.isWaitingForAnotherPlayer = false});
 
-  GameListState copyWith({
+  DisplayGames copyWith({
     KtList<Game>? openGames,
     bool? isLoading,
     bool? isWaitingForAnotherPlayer,
   }) {
-    return GameListState(
+    return DisplayGames(
         openGames: openGames ?? this.openGames,
         isLoading: isLoading ?? this.isLoading,
         isWaitingForAnotherPlayer:
             isWaitingForAnotherPlayer ?? this.isWaitingForAnotherPlayer);
   }
+}
+
+class NavigateToActiveGame extends GameListState {
+  final Game game;
+
+  NavigateToActiveGame(this.game);
 }
