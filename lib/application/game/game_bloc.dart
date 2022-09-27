@@ -7,6 +7,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   GameBloc({required this.ticTacToeApi, required this.game})
       : super(Initial()) {
     on<LoadGame>(_loadGame);
+    on<Move>(_makeMove);
   }
 
   final TicTacToeApi ticTacToeApi;
@@ -18,6 +19,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(ActiveGame(
         game: game,
       ));
+
+      // todo fetch game if enemy turn
+    } catch (error) {
+      // todo show error
+      print(error);
+    }
+  }
+
+  void _makeMove(Move event, Emitter<GameState> emit) async {
+    try {
+      //todo
     } catch (error) {
       // todo show error
       print(error);
@@ -27,10 +39,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
 class GameEvent {}
 
-// class GetOpenGames extends GameEvent {}
-//
-// class CreateNewGame extends GameEvent {}
-//
+class Move extends GameEvent {
+  final int fieldIndex;
+
+  Move(this.fieldIndex);
+}
+
 class LoadGame extends GameEvent {}
 
 class GameState {}

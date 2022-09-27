@@ -33,7 +33,8 @@ class GameWidget extends StatelessWidget {
 
             return Container(
               padding: const EdgeInsets.all(16.0),
-              child: buildGameScreen(state),
+              child: buildGameScreen(
+                  state, (int fieldIndex) => bloc.add(Move(fieldIndex))),
             );
           },
         ),
@@ -41,7 +42,7 @@ class GameWidget extends StatelessWidget {
     );
   }
 
-  Widget buildGameScreen(GameState state) {
+  Widget buildGameScreen(GameState state, Function(int) onFieldTap) {
     if (state is Initial) {
       return Container(
         alignment: Alignment.center,
@@ -62,9 +63,12 @@ class GameWidget extends StatelessWidget {
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 64)),
-          buildTicTacToeRow(0, state.getRow(0), state.game.player_role!),
-          buildTicTacToeRow(1, state.getRow(1), state.game.player_role!),
-          buildTicTacToeRow(2, state.getRow(2), state.game.player_role!),
+          buildTicTacToeRow(0, state.getRow(0), state.game.player_role!,
+              state.isMyTurn(), onFieldTap),
+          buildTicTacToeRow(1, state.getRow(1), state.game.player_role!,
+              state.isMyTurn(), onFieldTap),
+          buildTicTacToeRow(2, state.getRow(2), state.game.player_role!,
+              state.isMyTurn(), onFieldTap),
         ],
       );
     } else {
@@ -72,7 +76,8 @@ class GameWidget extends StatelessWidget {
     }
   }
 
-  Row buildTicTacToeRow(int rowIndex, KtList<String> board, String playerRole) {
+  Row buildTicTacToeRow(int rowIndex, KtList<String> board, String playerRole,
+      bool isMyTurn, Function(int) onTap) {
     double width = 100.0;
     double height = 100.0;
 
@@ -87,31 +92,42 @@ class GameWidget extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(border: Border.all()),
-          child: CustomPaint(
-            painter:
-                painterForField(firstField, identical(firstField, playerRole)),
-          ),
+          child: buildFieldWidget(
+              firstField, playerRole, isMyTurn, () => onTap(rowIndex * 3)),
         ),
         Container(
           width: width,
           height: height,
           decoration: BoxDecoration(border: Border.all()),
-          child: CustomPaint(
-            painter: painterForField(
-                secondField, identical(secondField, playerRole)),
-          ),
+          child: buildFieldWidget(
+              secondField, playerRole, isMyTurn, () => onTap(rowIndex * 3 + 1)),
         ),
         Container(
           width: width,
           height: height,
           decoration: BoxDecoration(border: Border.all()),
-          child: CustomPaint(
-            painter:
-                painterForField(thirdField, identical(thirdField, playerRole)),
-          ),
+          child: buildFieldWidget(
+              thirdField, playerRole, isMyTurn, () => onTap(rowIndex * 3 + 2)),
         ),
       ],
     );
+  }
+
+  Widget buildFieldWidget(
+      String field, String playerRole, bool isMyTurn, Function onTap) {
+    if (isMyTurn && identical(field, "f")) {
+      return InkWell(
+        onTap: () => onTap(),
+        child: Container(
+          height: double.infinity,
+          width: double.infinity,
+        ),
+      );
+    } else {
+      return CustomPaint(
+        painter: painterForField(field, identical(field, playerRole)),
+      );
+    }
   }
 
   CustomPainter painterForField(String field, bool fieldOwnedByMe) {
