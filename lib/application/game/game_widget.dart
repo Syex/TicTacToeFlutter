@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kt_dart/kt.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 import '../../data/dto/game.dart';
@@ -49,6 +50,7 @@ class GameWidget extends StatelessWidget {
     } else if (state is ActiveGame) {
       return Column(
         children: [
+          const Padding(padding: EdgeInsets.only(top: 16)),
           Center(
             child: AnimatedCrossFade(
               duration: const Duration(seconds: 1),
@@ -58,11 +60,67 @@ class GameWidget extends StatelessWidget {
                   ? CrossFadeState.showFirst
                   : CrossFadeState.showSecond,
             ),
-          )
+          ),
+          const Padding(padding: EdgeInsets.only(top: 64)),
+          buildTicTacToeRow(0, state.getRow(0), state.game.player_role!),
+          buildTicTacToeRow(1, state.getRow(1), state.game.player_role!),
+          buildTicTacToeRow(2, state.getRow(2), state.game.player_role!),
         ],
       );
     } else {
       throw Exception("State $state has no handling");
+    }
+  }
+
+  Row buildTicTacToeRow(int rowIndex, KtList<String> board, String playerRole) {
+    double width = 100.0;
+    double height = 100.0;
+
+    final firstField = board.get(0);
+    final secondField = board.get(1);
+    final thirdField = board.get(2);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(border: Border.all()),
+          child: CustomPaint(
+            painter:
+                painterForField(firstField, identical(firstField, playerRole)),
+          ),
+        ),
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(border: Border.all()),
+          child: CustomPaint(
+            painter: painterForField(
+                secondField, identical(secondField, playerRole)),
+          ),
+        ),
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(border: Border.all()),
+          child: CustomPaint(
+            painter:
+                painterForField(thirdField, identical(thirdField, playerRole)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  CustomPainter painterForField(String field, bool fieldOwnedByMe) {
+    if (identical(field, "x")) {
+      return DrawCross(fieldOwnedByMe);
+    } else if (identical(field, "o")) {
+      return DrawCircle(fieldOwnedByMe);
+    } else {
+      return DrawNothing();
     }
   }
 
@@ -74,5 +132,56 @@ class GameWidget extends StatelessWidget {
           fontWeight: FontWeight.bold,
           color: isMyTurn ? Colors.green : Colors.deepOrange),
     );
+  }
+}
+
+class DrawNothing extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {}
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class DrawCircle extends CustomPainter {
+  final bool ownedByMe;
+
+  DrawCircle(this.ownedByMe);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    paint.color = ownedByMe ? Colors.green : Colors.red;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 2.0;
+    canvas.drawCircle(
+        Offset(size.width / 2, size.height / 2), size.width / 2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class DrawCross extends CustomPainter {
+  final bool ownedByMe;
+
+  DrawCross(this.ownedByMe);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    paint.color = ownedByMe ? Colors.green : Colors.red;
+    paint.strokeWidth = 2.0;
+    canvas.drawLine(const Offset(0, 0), Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

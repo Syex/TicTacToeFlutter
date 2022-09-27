@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kt_dart/collection.dart';
 import 'package:tic_tac_toe/data/dto/game.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
@@ -55,6 +56,12 @@ class ActiveGame extends GameState {
 
   bool isDraw() {
     return game.state == "draw";
+  }
+
+  KtList<String> getRow(int rowNumber) {
+    KtMutableList<String> boardList = KtMutableList.from(game.board!);
+    boardList.drop(3 * rowNumber);
+    return boardList.take(3);
   }
 
   ActiveGame copyWith({
