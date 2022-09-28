@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kt_dart/collection.dart';
 import 'package:tic_tac_toe/data/dto/game.dart';
+import 'package:tic_tac_toe/data/dto/make_move_request.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
@@ -29,7 +30,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void _makeMove(Move event, Emitter<GameState> emit) async {
     try {
-      //todo
+      game = await ticTacToeApi.makeMove(
+          MakeMoveRequest(game.next_move_token!, event.fieldIndex),
+          game.player_token!);
+      emit(ActiveGame(
+        game: game,
+      ));
     } catch (error) {
       // todo show error
       print(error);

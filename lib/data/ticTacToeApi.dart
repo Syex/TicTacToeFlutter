@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:kt_dart/kt.dart';
 import 'package:tic_tac_toe/data/dto/game.dart';
 import 'package:tic_tac_toe/data/dto/join_game_request.dart';
+import 'package:tic_tac_toe/data/dto/make_move_request.dart';
 
 class TicTacToeApi {
   final String _baseUrl = "https://tik-tak-tioki.fly.dev/api";
@@ -55,6 +56,22 @@ class TicTacToeApi {
       return Game.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to join game ${request.name}: ${response.body}');
+    }
+  }
+
+  Future<Game> makeMove(MakeMoveRequest request, String playerToken) async {
+    final response = await http.post(
+      Uri.parse("$_baseUrl/move").replace(queryParameters: {
+        "player_token": playerToken,
+      }),
+      body: request.toJson(),
+    );
+
+    if (response.statusCode == 201) {
+      return Game.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception(
+          'Failed to join game ${request.toString()}: ${response.body}');
     }
   }
 }
