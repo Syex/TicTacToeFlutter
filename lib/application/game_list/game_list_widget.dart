@@ -7,12 +7,14 @@ import 'package:tic_tac_toe/application/game_list/game_list_bloc.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
 class GameListWidget extends StatelessWidget {
-  const GameListWidget({
+  GameListWidget({
     Key? key,
     required this.ticTacToeApi,
   }) : super(key: key);
 
   final TicTacToeApi ticTacToeApi;
+
+  BuildContext? dialogContext;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +29,20 @@ class GameListWidget extends StatelessWidget {
           child: BlocListener<GameListBloc, GameListState>(
             listener: (context, state) {
               if (state is NavigateToActiveGame) {
+                if (dialogContext != null) {
+                  Navigator.of(dialogContext!).pop();
+                  dialogContext = null;
+                }
+
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => GameWidget(
-                            ticTacToeApi: ticTacToeApi,
-                            initialGame: state.game)));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GameWidget(
+                                ticTacToeApi: ticTacToeApi,
+                                initialGame: state.game),
+                            maintainState: false))
+                    .then((value) => BlocProvider.of<GameListBloc>(context)
+                        .add(GetOpenGames()));
               }
             },
             child: BlocBuilder<GameListBloc, GameListState>(
@@ -93,11 +103,18 @@ class GameListWidget extends StatelessWidget {
             barrierDismissible: false,
             context: context,
             builder: (context) {
+              dialogContext = context;
               return AlertDialog(
                   title: const Text("Waiting for another player..."),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: const <Widget>[CircularProgressIndicator()],
+                    children: <Widget>[
+                      Text(state.createdGameName!),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 16),
+                      ),
+                      const CircularProgressIndicator()
+                    ],
                   ));
             });
       });

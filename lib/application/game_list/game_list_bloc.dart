@@ -26,9 +26,10 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
     emit(state.asDisplayGames().copyWith(isLoading: true));
 
     var game = await ticTacToeApi.createNewGame();
-    emit(state
-        .asDisplayGames()
-        .copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
+    emit(state.asDisplayGames().copyWith(
+        isLoading: false,
+        isWaitingForAnotherPlayer: true,
+        createdGameName: game.name));
 
     while (game.state == "awaiting_join") {
       await Future.delayed(const Duration(seconds: 2));
@@ -67,22 +68,27 @@ class DisplayGames extends GameListState {
   final KtList<Game> openGames;
   final bool isLoading;
   final bool isWaitingForAnotherPlayer;
+  final String? createdGameName;
 
-  DisplayGames(
-      {this.openGames = const KtList.empty(),
-      this.isLoading = true,
-      this.isWaitingForAnotherPlayer = false});
+  DisplayGames({
+    this.openGames = const KtList.empty(),
+    this.isLoading = true,
+    this.isWaitingForAnotherPlayer = false,
+    this.createdGameName,
+  });
 
-  DisplayGames copyWith({
-    KtList<Game>? openGames,
-    bool? isLoading,
-    bool? isWaitingForAnotherPlayer,
-  }) {
+  DisplayGames copyWith(
+      {KtList<Game>? openGames,
+      bool? isLoading,
+      bool? isWaitingForAnotherPlayer,
+      String? createdGameName}) {
     return DisplayGames(
-        openGames: openGames ?? this.openGames,
-        isLoading: isLoading ?? this.isLoading,
-        isWaitingForAnotherPlayer:
-            isWaitingForAnotherPlayer ?? this.isWaitingForAnotherPlayer);
+      openGames: openGames ?? this.openGames,
+      isLoading: isLoading ?? this.isLoading,
+      isWaitingForAnotherPlayer:
+          isWaitingForAnotherPlayer ?? this.isWaitingForAnotherPlayer,
+      createdGameName: createdGameName ?? this.createdGameName,
+    );
   }
 }
 

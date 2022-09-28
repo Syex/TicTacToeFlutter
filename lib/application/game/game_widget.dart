@@ -33,8 +33,8 @@ class GameWidget extends StatelessWidget {
 
             return Container(
               padding: const EdgeInsets.all(16.0),
-              child: buildGameScreen(
-                  state, (int fieldIndex) => bloc.add(Move(fieldIndex))),
+              child: buildGameScreen(state,
+                  (int fieldIndex) => bloc.add(Move(fieldIndex)), context),
             );
           },
         ),
@@ -42,7 +42,8 @@ class GameWidget extends StatelessWidget {
     );
   }
 
-  Widget buildGameScreen(GameState state, Function(int) onFieldTap) {
+  Widget buildGameScreen(
+      GameState state, Function(int) onFieldTap, BuildContext context) {
     if (state is Initial) {
       return Container(
         alignment: Alignment.center,
@@ -51,15 +52,14 @@ class GameWidget extends StatelessWidget {
     } else if (state is ActiveGame) {
       return Column(
         children: [
-          const Padding(padding: EdgeInsets.only(top: 16)),
+          const Padding(padding: EdgeInsets.only(top: 16, bottom: 16)),
           Center(
-            child: AnimatedCrossFade(
-              duration: const Duration(seconds: 1),
-              firstChild: buildTurnText(state.isMyTurn()),
-              secondChild: buildTurnText(!state.isMyTurn()),
-              crossFadeState: state.isMyTurn()
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
+            child: Text(
+              state.isMyTurn() ? "It's your turn" : "Waiting for enemy's turn",
+              style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                  color: state.isMyTurn() ? Colors.green : Colors.deepOrange),
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 64)),
@@ -69,10 +69,39 @@ class GameWidget extends StatelessWidget {
               state.isMyTurn(), onFieldTap),
           buildTicTacToeRow(2, state.getRow(2), state.game.player_role!,
               state.isMyTurn(), onFieldTap),
+          const Padding(padding: EdgeInsets.only(top: 32)),
+          buildGameEndWidget(state, context),
         ],
       );
     } else {
       throw Exception("State $state has no handling");
+    }
+  }
+
+  Widget buildGameEndWidget(ActiveGame state, BuildContext context) {
+    if (state.didIWin() || state.didTheyWin() || state.isDraw()) {
+      String text;
+      if (state.didIWin()) {
+        text = "You won!";
+      } else if (state.didTheyWin()) {
+        text = "You lost!";
+      } else {
+        text = "It's a draw!";
+      }
+      return Column(
+        children: [
+          Text(text,
+              style: const TextStyle(
+                fontSize: 36.0,
+                fontWeight: FontWeight.bold,
+              )),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"))
+        ],
+      );
+    } else {
+      return Container();
     }
   }
 
@@ -138,16 +167,6 @@ class GameWidget extends StatelessWidget {
     } else {
       return DrawNothing();
     }
-  }
-
-  Widget buildTurnText(bool isMyTurn) {
-    return Text(
-      isMyTurn ? "It's your turn" : "Waiting for enemy's turn",
-      style: TextStyle(
-          fontSize: 24.0,
-          fontWeight: FontWeight.bold,
-          color: isMyTurn ? Colors.green : Colors.deepOrange),
-    );
   }
 }
 

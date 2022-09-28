@@ -48,7 +48,7 @@ class TicTacToeApi {
 
   Future<Game> joinGame(JoinGameRequest request) async {
     final response = await http.post(
-      Uri.parse("$_baseUrl/game"),
+      Uri.parse("$_baseUrl/join"),
       body: request.toJson(),
     );
 
@@ -64,14 +64,17 @@ class TicTacToeApi {
       Uri.parse("$_baseUrl/move").replace(queryParameters: {
         "player_token": playerToken,
       }),
-      body: request.toJson(),
+      headers: {
+        "content-type": "application/json",
+      },
+      body: jsonEncode(request.toJson()),
     );
 
     if (response.statusCode == 201) {
       return Game.fromJson(jsonDecode(response.body));
     } else {
       throw Exception(
-          'Failed to join game ${request.toString()}: ${response.body}');
+          'Failed to make move ${request.toString()}: ${response.body}');
     }
   }
 }

@@ -20,8 +20,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(state);
 
       if (_isEnemyTurn()) {
-        _pullGameStatus(emit);
-      }
+        await _pullGameStatus(emit);
+    }
   }
 
   void _makeMove(Move event, Emitter<GameState> emit) async {
@@ -32,11 +32,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(state);
 
       if (_isEnemyTurn()) {
-        _pullGameStatus(emit);
-      }
+        await _pullGameStatus(emit);
+    }
   }
 
-  void _pullGameStatus(Emitter<GameState> emit) async {
+  Future _pullGameStatus(Emitter<GameState> emit) async {
     while (_isEnemyTurn()) {
       Future.delayed(const Duration(milliseconds: 500));
       game = await ticTacToeApi.loadGame(game.player_token!);
@@ -87,8 +87,8 @@ class ActiveGame extends GameState {
 
   KtList<String> getRow(int rowNumber) {
     KtMutableList<String> boardList = KtMutableList.from(game.board!);
-    boardList.drop(3 * rowNumber);
-    return boardList.take(3);
+    KtList<String> shortenedList = boardList.drop(3 * rowNumber);
+    return shortenedList.take(3);
   }
 
   ActiveGame copyWith({
