@@ -58,33 +58,40 @@ class GameListWidget extends StatelessWidget {
                 final bloc = BlocProvider.of<GameListBloc>(context);
                 final openGames = state.openGames;
 
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          padding: const EdgeInsets.all(8),
-                          itemCount: openGames.size,
-                          itemBuilder: (BuildContext context, int index) {
-                            final game = openGames[index];
-                            return InkWell(
-                              onTap: () => bloc.add(JoinGame(game.name)),
-                              child: Container(
-                                height: 80,
-                                child: Center(child: Text(game.name)),
-                              ),
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const Divider(),
+                return RefreshIndicator(
+                  onRefresh: () {
+                    bloc.add(GetOpenGames());
+                    return Future(() => null);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: ListView.separated(
+                            padding: const EdgeInsets.all(8),
+                            itemCount: openGames.size,
+                            itemBuilder: (BuildContext context, int index) {
+                              final game = openGames[index];
+                              return InkWell(
+                                onTap: () => bloc.add(JoinGame(game.name)),
+                                child: Container(
+                                  height: 80,
+                                  child: Center(child: Text(game.name)),
+                                ),
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) =>
+                                    const Divider(),
+                          ),
                         ),
-                      ),
-                      TextButton.icon(
-                          onPressed: () => bloc.add(CreateNewGame()),
-                          icon: const Icon(Icons.add),
-                          label: const Text("Create new game"))
-                    ],
+                        TextButton.icon(
+                            onPressed: () => bloc.add(CreateNewGame()),
+                            icon: const Icon(Icons.add),
+                            label: const Text("Create new game"))
+                      ],
+                    ),
                   ),
                 );
               },
