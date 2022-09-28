@@ -15,48 +15,33 @@ class GameListBloc extends Bloc<GameListEvent, GameListState> {
 
   void _getOpenGames(GetOpenGames event, Emitter<GameListState> emit) async {
     emit(DisplayGames(isLoading: true));
-    try {
-      final openGames = await ticTacToeApi.fetchOpenGames();
-      emit(DisplayGames(
-        openGames: openGames,
-        isLoading: false,
-      ));
-    } catch (error) {
-      // todo show error
-      print(error);
-    }
+    final openGames = await ticTacToeApi.fetchOpenGames();
+    emit(DisplayGames(
+      openGames: openGames,
+      isLoading: false,
+    ));
   }
 
   void _createNewGame(CreateNewGame event, Emitter<GameListState> emit) async {
     emit(state.asDisplayGames().copyWith(isLoading: true));
 
-    try {
-      var game = await ticTacToeApi.createNewGame();
-      emit(state
-          .asDisplayGames()
-          .copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
+    var game = await ticTacToeApi.createNewGame();
+    emit(state
+        .asDisplayGames()
+        .copyWith(isLoading: false, isWaitingForAnotherPlayer: true));
 
-      while (game.state == "awaiting_join") {
-        await Future.delayed(const Duration(seconds: 2));
-        game = await ticTacToeApi.loadGame(game.player_token!);
-      }
-      emit(NavigateToActiveGame(game));
-    } catch (error) {
-      // todo show error
-      print(error);
+    while (game.state == "awaiting_join") {
+      await Future.delayed(const Duration(seconds: 2));
+      game = await ticTacToeApi.loadGame(game.player_token!);
     }
+    emit(NavigateToActiveGame(game));
   }
 
   void _joinGame(JoinGame event, Emitter<GameListState> emit) async {
     emit(state.asDisplayGames().copyWith(isLoading: true));
 
-    try {
-      final newGame = await ticTacToeApi.joinGame(JoinGameRequest(event.name));
-      emit(NavigateToActiveGame(newGame));
-    } catch (error) {
-      // todo show error
-      print(error);
-    }
+    final newGame = await ticTacToeApi.joinGame(JoinGameRequest(event.name));
+    emit(NavigateToActiveGame(newGame));
   }
 }
 
