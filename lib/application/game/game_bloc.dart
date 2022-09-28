@@ -17,11 +17,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   void _loadGame(LoadGame event, Emitter<GameState> emit) async {
     try {
       game = await ticTacToeApi.loadGame(game.player_token!);
-      emit(ActiveGame(
-        game: game,
-      ));
+      ActiveGame state = ActiveGame(game: game);
+      emit(state);
 
-      // todo fetch game if enemy turn
+      if (_isEnemyTurn()) {
+        _pullGameStatus(emit);
+      }
     } catch (error) {
       // todo show error
       print(error);
@@ -33,13 +34,29 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       game = await ticTacToeApi.makeMove(
           MakeMoveRequest(game.next_move_token!, event.fieldIndex),
           game.player_token!);
-      emit(ActiveGame(
-        game: game,
-      ));
+      ActiveGame state = ActiveGame(game: game);
+      emit(state);
+
+      if (_isEnemyTurn()) {
+        _pullGameStatus(emit);
+      }
     } catch (error) {
       // todo show error
       print(error);
     }
+  }
+
+  void _pullGameStatus(Emitter<GameState> emit) async {
+    while (_isEnemyTurn()) {
+      Future.delayed(const Duration(milliseconds: 500));
+      game = await ticTacToeApi.loadGame(game.player_token!);
+    }
+
+    emit(ActiveGame(game: game));
+  }
+
+  bool _isEnemyTurn() {
+    return game.state == "their_turn";
   }
 }
 
