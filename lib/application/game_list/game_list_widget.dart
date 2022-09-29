@@ -6,14 +6,19 @@ import 'package:tic_tac_toe/application/game/game_widget.dart';
 import 'package:tic_tac_toe/application/game_list/game_list_bloc.dart';
 import 'package:tic_tac_toe/data/ticTacToeApi.dart';
 
-class GameListWidget extends StatelessWidget {
-  GameListWidget({
+class GameListWidget extends StatefulWidget {
+  const GameListWidget({
     Key? key,
     required this.ticTacToeApi,
   }) : super(key: key);
 
   final TicTacToeApi ticTacToeApi;
 
+  @override
+  State<GameListWidget> createState() => _GameListWidgetState();
+}
+
+class _GameListWidgetState extends State<GameListWidget> {
   BuildContext? dialogContext;
 
   @override
@@ -24,8 +29,8 @@ class GameListWidget extends StatelessWidget {
       ),
       body: LoaderOverlay(
         child: BlocProvider(
-          create: (context) =>
-              GameListBloc(ticTacToeApi: ticTacToeApi)..add(GetOpenGames()),
+          create: (context) => GameListBloc(ticTacToeApi: widget.ticTacToeApi)
+            ..add(GetOpenGames()),
           child: BlocListener<GameListBloc, GameListState>(
             listener: (context, state) {
               if (state is NavigateToActiveGame) {
@@ -38,7 +43,7 @@ class GameListWidget extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) => GameWidget(
-                                ticTacToeApi: ticTacToeApi,
+                                ticTacToeApi: widget.ticTacToeApi,
                                 initialGame: state.game),
                             maintainState: false))
                     .then((value) => BlocProvider.of<GameListBloc>(context)
